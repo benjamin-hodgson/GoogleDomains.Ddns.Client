@@ -1,0 +1,74 @@
+name: .NET build and publish
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - v*
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - uses: actions/checkout@v2
+      with:
+        repository: benjamin-hodgson/DocFXTemplate
+        path: DocFXTemplate
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Get last tag
+      id: last_tag
+      # v1.1.0
+      uses: WyriHaximus/github-action-get-previous-tag@8a0e045f02c0a3a04e1452df58b90fc7e555e950
+
+    - name: Get next version
+      id: next_version
+      # v1.1.0
+      uses: WyriHaximus/github-action-next-semvers@33d116a4c239252582a60a1ba8dbba63ad493ffd
+      with:
+        version: ${{ steps.last_tag.outputs.tag }}
+  
+    - name: Compute version for this build
+      id: get_version
+      run: |
+        shopt -s extglob
+        echo ::set-output name=BRANCH::${GITHUB_REF#@(refs/tags/|refs/heads/)}
+        if [[ $GITHUB_REF == refs/tags/* ]] ;
+        then
+            echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
+        else
+            echo ::set-output name=VERSION::${{ steps.next_version.outputs.patch }}-build.${{ github.run_id }}
+        fi
+    - name: Restore nuget packages
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore --configuration Release -p:Version=${{ steps.get_version.outputs.VERSION }}
+
+    - name: Pack
+      run: dotnet publish --no-build --configuration Release -o publish -p:Version=${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Create Github Release
+      # v0.1.14
+      uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: publish/*
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      
+    - uses: actions/upload-artifact@v2
+      with:
+        name: publish
+        path: publish
