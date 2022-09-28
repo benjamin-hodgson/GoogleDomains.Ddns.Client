@@ -58,7 +58,7 @@ class Worker : BackgroundService
                     UserAgent =
                     {
                         new ProductInfoHeaderValue(
-                            Assembly.GetExecutingAssembly().FullName!,
+                            Assembly.GetExecutingAssembly().GetName().Name!,
                             Assembly.GetExecutingAssembly().GetName().Version?.ToString()
                         )
                     }
