@@ -1,7 +1,7 @@
 `GoogleDomains.Ddns.Client`
 ===========================
 
-This is a Windows client for Google Domains's Dynamic DNS feature. It runs as a Windows service.
+This is a Windows client for Google Domains's Dynamic DNS feature. I wrote it for my own use. It runs as a Windows service.
 
 Installation
 ------------
