@@ -1,6 +1,8 @@
 `GoogleDomains.Ddns.Client`
 ===========================
 
+**Deprecated**: I don't use this any more. I no longer need DDNS and Google Domains is down the toilet anyway.
+
 This is a Windows client for Google Domains's Dynamic DNS feature. I wrote it for my own use. It runs as a Windows service.
 
 Installation
